@@ -17,9 +17,6 @@ build/
 .env.development
 .env.production
 
-# Директория Docker (чтобы не хранить конфигурацию в репозитории)
-docker/
-
 # Файлы для локальной разработки Docker
 docker-compose.override.yml
 
