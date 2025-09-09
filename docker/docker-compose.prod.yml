@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  frontend:
+    container_name: site-sant-frontend-prod
+    build:
+      context: ../frontend
+      dockerfile: ../docker/Dockerfile.frontend
+      args:
+        - NODE_ENV=production
+    restart: unless-stopped
+
+  backend:
+    container_name: site-sant-backend-prod
+    build:
+      context: ../backend
+      dockerfile: ../docker/Dockerfile.backend
+      args:
+        - NODE_ENV=production
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: site-sant-nginx-prod
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+networks:
+  default:
+    name: site-sant-network
