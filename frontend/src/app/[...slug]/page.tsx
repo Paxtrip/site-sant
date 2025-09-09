@@ -1,6 +1,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import strapi from '@/lib/strapi';
+import PrintButton from '@/app/components/PrintButton'; // Импортируем кнопку
 
 // Определим типы для данных
 interface StrapiDataItem<T> {
@@ -12,9 +13,6 @@ interface Page {
   title: string;
   content: string;
 }
-
-// Эта функция будет генерировать статические пути во время сборки
-// export async function generateStaticParams() { ... }
 
 // Основной компонент страницы
 const DynamicPage = async ({ params }: { params: { slug: string[] } }) => {
@@ -54,6 +52,7 @@ const DynamicPage = async ({ params }: { params: { slug: string[] } }) => {
         className="prose lg:prose-xl"
         dangerouslySetInnerHTML={{ __html: page.attributes.content }}
       />
+      <PrintButton />
     </div>
   );
 };

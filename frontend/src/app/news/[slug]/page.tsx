@@ -1,6 +1,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import strapi from '@/lib/strapi';
+import PrintButton from '@/app/components/PrintButton'; // Импортируем кнопку
 
 // Определим типы для данных
 interface StrapiDataItem<T> {
@@ -14,12 +15,12 @@ interface News {
   publishedDate: string;
 }
 
-// Основной компонент страницы новости
+// Компонент страницы новости
 const NewsPage = async ({ params }: { params: { slug: string } }) => {
   const { slug } = params;
 
-  // Пытаемся найти новость по slug
-  const findNews = async (): Promise<StrapiDataItem<News> | null> => {
+  // Загружаем новость по slug
+  const getNewsItem = async (): Promise<StrapiDataItem<News> | null> => {
     try {
       const response = await strapi.get('/api/news', {
         params: {
@@ -33,28 +34,31 @@ const NewsPage = async ({ params }: { params: { slug: string } }) => {
       }
       return null;
     } catch (error) {
-      console.error('Ошибка при поиске новости:', error);
+      console.error(`Ошибка при загрузке новости "${slug}":`, error);
       return null;
     }
   };
 
-  const news = await findNews();
+  const newsItem = await getNewsItem();
 
   // Если новость не найдена, показываем 404
-  if (!news) {
+  if (!newsItem) {
     return notFound();
   }
 
+  const { title, content, publishedDate } = newsItem.attributes;
+
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-2">{news.attributes.title}</h1>
+      <h1 className="text-3xl font-bold mb-2">{title}</h1>
       <p className="text-gray-500 mb-4">
-        {new Date(news.attributes.publishedDate).toLocaleDateString('ru-RU')}
+        Опубликовано: {new Date(publishedDate).toLocaleDateString('ru-RU')}
       </p>
       <div
         className="prose lg:prose-xl"
-        dangerouslySetInnerHTML={{ __html: news.attributes.content }}
+        dangerouslySetInnerHTML={{ __html: content }}
       />
+      <PrintButton />
     </div>
   );
 };

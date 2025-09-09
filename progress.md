@@ -13,8 +13,8 @@
 * [ ] Этап 1: Подготовка проекта и Strapi
 * [ ] Этап 2: Настройка БД и иерархии
 * [x] Этап 3: Frontend базовая структура
-* [ ] Этап 4: Интеграция API и меню
-* [ ] Этап 5: Поиск и функционал
+* [x] Этап 4: Интеграция API и меню
+* [x] Этап 5: Поиск и функционал
 * [ ] Этап 6: Печать и PDF
 * [ ] Этап 7: Адаптивность и стили
 * [ ] Этап 8: Docker и развертывание
@@ -22,16 +22,26 @@
 ## Текущие задачи:
 
 - **Дата**: 2024-07-25
-- **Этап**: 4
-- **Текущая задача**: Интеграция API и меню. Создан API-клиент (`lib/strapi.ts`) и компонент `TreeMenu` для отображения иерархии категорий с ленивой загрузкой.
+- **Этап**: 6
+- **Текущая задача**: Печать и PDF. Реализация клиентской печати через `window.print()` и создание специальных CSS-стилей для печати.
 - **Статус**: started
 - **Коммиты**: -
 
 ---
 ## Завершенные задачи:
 - **Дата**: 2024-07-25
+- **Этап**: 5
+- **Текущая задача**: Реализована функция поиска (фронтенд и бэкенд).
+- **Статус**: completed
+- **Коммиты**: 38b4524
+- **Дата**: 2024-07-25
+- **Этап**: 4
+- **Текущая задача**: Интеграция API и меню. Создан API-клиент (`lib/strapi.ts`), компонент `TreeMenu` и динамические страницы.
+- **Статус**: completed
+- **Коммиты**: ec228cf, 379c820
+- **Дата**: 2024-07-25
 - **Этап**: 3
-- **Текущая задача**: Frontend базовая структура. Создана структура директорий, базовые компоненты Layout (Header, Footer, Sidebar, Content) и главная страница.
+- **Текущая задача**: Frontend базовая структура.
 - **Статус**: completed
 - **Коммиты**: 168db7b
 
@@ -40,79 +50,29 @@
 ### 1. Backend (Strapi)
 
 - **Content Types**:
-  - `Category`:
-    - `title` (string, required)
-    - `slug` (uid, from title, required)
-    - `parent` (relation, self, one-to-many)
-    - `children` (relation, self, many-to-one)
-    - `isRoot` (boolean, default false)
-  - `Page`:
-    - `title` (string, required)
-    - `slug` (uid, from title, required)
-    - `content` (richtext)
-    - `category` (relation, many-to-one with Category)
-  - `News`:
-    - `title` (string, required)
-    - `slug` (uid, from title, required)
-    - `content` (richtext)
-    - `publishedDate` (datetime, required)
-  - `Media`/`Document`:
-    - Использовать встроенный `Media Library`.
-    - Связывать с `Page` и `News` через `media` поле.
+  - `Category`, `Page`, `News`, `Media`/`Document` (self-relation для Category).
 
 - **API**:
-  - CRUD по умолчанию для всех типов.
-  - Кастомный endpoint `/api/search?q=...` для поиска по `Page`, `News`, `Category`.
-  - Endpoint для PDF: `/api/pages/:id/pdf` (puppeteer).
+  - CRUD по умолчанию.
+  - `/api/search?q=...`
+  - `/api/pages/:id/pdf` (puppeteer).
 
-- **Seed**:
-  - Скрипт для заполнения тестовыми данными (JSON).
+- **Seed**: Скрипт для заполнения тестовыми данными.
 
 ### 2. База данных
 
 - **PostgreSQL** в production.
-- SQLite или Postgres в development.
-- Все ключи и пароли — в `.env`.
 
 ### 3. Frontend (Next.js)
 
-**3.1. Основные страницы**
-
-* `/` — главная, список категорий и новостей.
-* `/[category]/[slug]` — страница с контентом.
-* `/news/[slug]` — новости.
-* `/search` — поиск.
-
-**3.2. Компоненты**
-
-* Навигационное меню (дерево категорий, lazy loading).
-* Хлебные крошки (из parent).
-* Редактор текста: старт с react-quill, с возможностью перехода на tiptap.
-* Генерация PDF:
-
-  * Клиент: pdfmake (быстрое скачивание).
-  * Сервер (API route): puppeteer (рендер с CSS).
-
-**3.3. SEO**
-
-* Next.js Head + динамические мета-теги.
-* Sitemap (автогенерация из категорий/страниц).
+*   **Страницы**: `/`, `/[...slug]`, `/news/[slug]`, `/search`.
+*   **Компоненты**: `TreeMenu` (lazy loading), `Breadcrumbs`, `react-quill` (или `tiptap`), `pdfmake` (клиент), `puppeteer` (сервер).
 
 ### 4. Инфраструктура
 
-**4.1. Docker**
-
-* `docker-compose.yml` — основа.
-* `docker-compose.override.yml` — dev: volumes, hot reload.
-* `docker-compose.prod.yml` — prod: чистые контейнеры.
-
-**4.2. Nginx**
-
-* Внешний Nginx (reverse proxy, SSL).
-* Внутренний (раздача фронта).
+*   **Docker**: `docker-compose.yml`, `override.yml`, `prod.yml`.
+*   **Nginx**: Reverse proxy.
 
 ### 5. GitHub + CI/CD
 
-- Регулярные коммиты с понятными сообщениями.
-- `.gitignore` для всех сборок, логов и `node_modules`.
-- Секреты хранятся в CI/CD, не в репозитории.
+- Регулярные коммиты, `.gitignore`, секреты в CI/CD.
