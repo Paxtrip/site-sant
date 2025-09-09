@@ -1,0 +1,27 @@
+# Файлы зависимостей
+node_modules/
+
+# Локальные файлы Next.js
+.next/
+
+# Локальные файлы Strapi
+.cache/
+build/
+
+# Базы данных
+*.db
+
+# Логи и переменные окружения
+.env
+.env.local
+.env.development
+.env.production
+
+# Директория Docker (чтобы не хранить конфигурацию в репозитории)
+docker/
+
+# Файлы для локальной разработки Docker
+docker-compose.override.yml
+
+# Логи
+docs/logs/
