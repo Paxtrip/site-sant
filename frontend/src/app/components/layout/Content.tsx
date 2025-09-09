@@ -5,10 +5,11 @@ type ContentProps = {
 };
 
 const Content: React.FC<ContentProps> = ({ children }) => {
+  // Основной контейнер для контента с белым фоном и скруглениями
   return (
-    <main className="flex-1 p-4">
+    <div className="bg-white p-6 rounded-lg shadow-sm min-h-full">
       {children}
-    </main>
+    </div>
   );
 };
 

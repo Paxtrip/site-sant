@@ -1,14 +1,23 @@
 import React from 'react';
 import TreeMenu from '@/app/components/TreeMenu';
+import Search from '@/app/components/Search'; // Добавим поиск в сайдбар
 
 const Sidebar = () => {
   return (
-    <aside className="w-64 bg-gray-100 p-4">
-      <nav>
-        <h2 className="text-lg font-bold mb-2">Категории</h2>
+    <div>
+      {/* Поиск в верхней части сайдбара */}
+      <div className="mb-6">
+        <Search />
+      </div>
+      
+      {/* Меню категорий */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
+          Навигация
+        </h2>
         <TreeMenu />
-      </nav>
-    </aside>
+      </div>
+    </div>
   );
 };
 
