@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import Tree from 'rc-tree';
 import 'rc-tree/assets/index.css';
