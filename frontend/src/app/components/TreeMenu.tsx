@@ -19,12 +19,19 @@ interface Category {
   };
 }
 
-// Тип для узла дерева
+// Тип для узла дерева, используемый в rc-tree
+// Он должен соответствовать ожиданиям `rc-tree`
 interface TreeNode {
   key: string;
   title: string;
   children?: TreeNode[];
   isLeaf: boolean;
+}
+
+// Тип для узла, который передается в onLoadData
+// `rc-tree` может передавать дополнительные свойства, но нам важен `key`
+interface LoadDataNode {
+    key: React.Key;
 }
 
 const TreeMenu = () => {
@@ -43,6 +50,7 @@ const TreeMenu = () => {
       const rootNodes: TreeNode[] = response.data.data.map((item: StrapiDataItem<Category>) => ({
         key: item.id.toString(),
         title: item.attributes.title,
+        // Устанавливаем isLeaf в false, если есть дочерние элементы
         isLeaf: item.attributes.children.data.length === 0,
       }));
 
@@ -57,16 +65,18 @@ const TreeMenu = () => {
   }, []);
 
   // Функция для ленивой загрузки дочерних узлов
-  const onLoadData = async (node: any): Promise<void> => {
+  const onLoadData = async (node: LoadDataNode): Promise<void> => {
     const { key } = node;
     try {
       const response = await strapi.get(`/api/categories/${key}`, {
         params: {
+          // Запрашиваем дочерние элементы и их дочерние элементы (для isLeaf)
           populate: { children: { populate: { children: { count: true } } } },
         },
       });
 
-      const childrenNodes: TreeNode[] = response.data.data.attributes.children.data.map((item: StrapiDataItem<Category>) => ({
+      const childrenData = response.data.data.attributes.children.data;
+      const childrenNodes: TreeNode[] = childrenData.map((item: StrapiDataItem<Category>) => ({
         key: item.id.toString(),
         title: item.attributes.title,
         isLeaf: item.attributes.children.data.length === 0,

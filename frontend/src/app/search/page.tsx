@@ -57,7 +57,7 @@ const SearchResults = () => {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-4">Результаты поиска по запросу: "{query}"</h1>
+            <h1 className="text-2xl font-bold mb-4">Результаты поиска по запросу: &quot;{query}&quot;</h1>
             {results.length > 0 ? (
                 <ul>
                     {results.map(item => (
