@@ -4,43 +4,52 @@
 FROM node:18-alpine AS build
 
 # Установка системных зависимостей для сборки
+# python3, make, g++ нужны для сборки некоторых нативных модулей
 RUN apk add --no-cache libc6-compat python3 make g++
 
-WORKDIR /opt/
+# Создаем рабочую директорию
+WORKDIR /opt/app
 
 # Копируем package.json и yarn.lock для установки зависимостей
-COPY ./backend/package.json ./backend/yarn.lock* ./
+# Это позволяет кэшировать слой с зависимостями, если эти файлы не менялись
+COPY backend/package.json backend/yarn.lock ./
 
-# Установка зависимостей Strapi
+# Устанавливаем все зависимости (включая devDependencies для сборки)
 RUN yarn install --frozen-lockfile
 
-# Копируем исходный код бэкенда
-WORKDIR /opt/app
-COPY ./backend ./
+# Копируем весь исходный код бэкенда
+COPY backend/ ./
 
 # Сборка админ-панели Strapi
+# yarn build выполнит команду "strapi build" из package.json
 RUN yarn build
 
 # --- Этап 2: Production ---
 FROM node:18-alpine
 
-# Установка системных зависимостей
+# Установка минимальных системных зависимостей
 RUN apk add --no-cache libc6-compat
 
-WORKDIR /opt/
+# Устанавливаем рабочую директорию
+WORKDIR /opt/app
 
-# Копируем package.json и yarn.lock
-COPY --from=build /opt/package.json /opt/yarn.lock* ./
+# Копируем package.json и yarn.lock из предыдущего этапа
+COPY --from=build /opt/app/package.json /opt/app/yarn.lock ./
 
-# Установка ТОЛЬКО production-зависимостей
+# Устанавливаем ТОЛЬКО production-зависимости, чтобы уменьшить размер образа
 RUN yarn install --production --frozen-lockfile
 
-# Копируем собранное приложение
-WORKDIR /opt/app
-COPY --from=build /opt/app ./
+# Копируем собранное приложение и нужные для запуска файлы
+COPY --from=build /opt/app/config ./config
+COPY --from=build /opt/app/database ./database
+COPY --from=build /opt/app/src ./src
+COPY --from=build /opt/app/build ./build
+# .strapi может содержать важные файлы, например, для плагинов
+COPY --from=build /opt/app/.strapi ./.strapi
+COPY --from=build /opt/app/public ./public
 
 # Открываем порт, на котором работает Strapi
 EXPOSE 1337
 
-# Запуск приложения
+# Запускаем приложение в production режиме
 CMD ["yarn", "start"]
