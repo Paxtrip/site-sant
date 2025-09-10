@@ -1,0 +1,39 @@
+# Dockerfile для Next.js (Frontend)
+
+# --- Этап 1: Установка зависимостей ---
+FROM node:18-alpine AS dependencies
+
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+COPY ./frontend/package.json ./frontend/yarn.lock* ./
+
+RUN yarn install --frozen-lockfile
+
+# --- Этап 2: Сборка ---
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY ./frontend ./
+
+RUN yarn build
+
+# --- Этап 3: Production ---
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Копируем собранные файлы
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+
+EXPOSE 3000
+
+CMD ["yarn", "start"]

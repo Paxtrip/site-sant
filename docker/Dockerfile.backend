@@ -1,0 +1,46 @@
+# Dockerfile для Strapi (Backend)
+
+# --- Этап 1: Сборка ---
+FROM node:18-alpine AS build
+
+# Установка системных зависимостей для сборки
+RUN apk add --no-cache libc6-compat python3 make g++
+
+WORKDIR /opt/
+
+# Копируем package.json и yarn.lock для установки зависимостей
+COPY ./backend/package.json ./backend/yarn.lock* ./
+
+# Установка зависимостей Strapi
+RUN yarn install --frozen-lockfile
+
+# Копируем исходный код бэкенда
+WORKDIR /opt/app
+COPY ./backend ./
+
+# Сборка админ-панели Strapi
+RUN yarn build
+
+# --- Этап 2: Production ---
+FROM node:18-alpine
+
+# Установка системных зависимостей
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /opt/
+
+# Копируем package.json и yarn.lock
+COPY --from=build /opt/package.json /opt/yarn.lock* ./
+
+# Установка ТОЛЬКО production-зависимостей
+RUN yarn install --production --frozen-lockfile
+
+# Копируем собранное приложение
+WORKDIR /opt/app
+COPY --from=build /opt/app ./
+
+# Открываем порт, на котором работает Strapi
+EXPOSE 1337
+
+# Запуск приложения
+CMD ["yarn", "start"]
